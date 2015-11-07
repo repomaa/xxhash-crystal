@@ -33,8 +33,8 @@ puts XXHash64.hex_digest("foobar")
 # Stream data
 XXHash64.open(seed) do |digester|
   buffer :: UInt8[1024]
-  while (len = some_io.read(buffer)) != 0
-    digester.write(buffer[0, len])
+  while (len = some_io.read(buffer.to_slice)) != 0
+    digester.write(buffer.to_slice[0, len])
   end
 
   puts digester.hex_digest
