@@ -28,7 +28,8 @@ end
     end
 
     def hex_digest(input, seed = 0 : Int)
-      digest(input, seed).to_s(16)
+      hash = digest(input, seed)
+      hash_to_hex(hash)
     end
 
     def open(seed = 0)
@@ -38,6 +39,12 @@ end
       ensure
         digester.close
       end
+    end
+
+    def hash_to_hex(hash)
+      bytes = (pointerof(hash) as UInt8[{{ bits / 8 }}]*).value
+      bytes.reverse!
+      bytes.map { |byte| "%02x" % byte }.join
     end
 
     class Digester
@@ -69,7 +76,8 @@ end
       end
 
       def hex_digest
-        digest.to_s(16)
+        hash = digest.to_s(16)
+        XXHash{{ bits }}.hash_to_hex(hash)
       end
     end
 
