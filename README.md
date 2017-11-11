@@ -23,8 +23,8 @@ You should use the one that matches your cpu architecture.
 ```crystal
 require "xxhash"
 
-# Pass a nn-bit seed 
-seed = (SecureRandom.random_bytes(8).to_unsafe as UInt64*).value
+# Pass a nn-bit seed
+seed = (SecureRandom.random_bytes(8).to_unsafe.as(UInt64*)).value
 puts XXHash64.hex_digest("foobar", seed)
 
 # Or use 0 by default
@@ -32,11 +32,7 @@ puts XXHash64.hex_digest("foobar")
 
 # Stream data
 XXHash64.open(seed) do |digester|
-  buffer :: UInt8[1024]
-  while (len = some_io.read(buffer.to_slice)) != 0
-    digester.write(buffer.to_slice[0, len])
-  end
-
+  IO.copy(some_io, digester)
   puts digester.hex_digest
 end
 ```
