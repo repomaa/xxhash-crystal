@@ -41,6 +41,18 @@ XXHash64.open(seed) do |digester|
 end
 ```
 
+## Benchmarks
+
+Run with `make bench`. Set the `DATA_SIZE_GIB` environment variable to alter
+used data size.
+
+```
+Hashing 16GiB of (semi)random data
+               user     system      total        real
+XXHash32   4.250000   0.000000   4.250000 (  4.247582)
+XXHash64   2.410000   0.000000   2.410000 (  2.413591)
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/jreinert/xxhash/fork )

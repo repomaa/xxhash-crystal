@@ -2,7 +2,7 @@ require "./xxhash/*"
 
 lib LibXXHash
   enum Error
-    Ok = 0
+    Ok    = 0
     Error
   end
 end
@@ -23,11 +23,11 @@ end
   end
 
   module XXHash{{ bits }}
-    def digest(input, seed = 0 : Int)
-      LibXXHash{{ bits }}.hash(input.to_unsafe as Void*, input.bytesize.to_u{{ bits }}, seed.to_u{{ bits }})
+    def digest(input, seed : Int = 0)
+      LibXXHash{{ bits }}.hash(input.to_unsafe.as(Void*), input.bytesize.to_u{{ bits }}, seed.to_u{{ bits }})
     end
 
-    def hex_digest(input, seed = 0 : Int)
+    def hex_digest(input, seed : Int = 0)
       hash = digest(input, seed)
       hash_to_hex(hash)
     end
@@ -42,7 +42,7 @@ end
     end
 
     def hash_to_hex(hash)
-      bytes = (pointerof(hash) as UInt8[{{ bits / 8 }}]*).value
+      bytes = (pointerof(hash).as(UInt8[{{ bits / 8 }}]*)).value
       bytes.reverse!
       bytes.map { |byte| "%02x" % byte }.join
     end
@@ -50,7 +50,9 @@ end
     class Digester
       include IO
 
-      def initialize(seed = 0 : Int)
+      @state : LibXXHash{{ bits }}::State
+
+      def initialize(seed : Int = 0)
         state = LibXXHash{{ bits }}.create_state
         unless LibXXHash{{ bits }}.reset(state, seed.to_u{{ bits }}) == LibXXHash::Error::Ok
           raise Exception.new("failed to initialize digester")
@@ -64,7 +66,7 @@ end
       end
 
       def write(slice)
-        LibXXHash{{ bits }}.update(@state, slice.to_unsafe as Void*, slice.size)
+        LibXXHash{{ bits }}.update(@state, slice.to_unsafe.as(Void*), slice.size)
       end
 
       def read(slice)

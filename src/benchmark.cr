@@ -2,21 +2,58 @@ require "benchmark"
 require "secure_random"
 require "./xxhash"
 
-puts "Digesting blocks of 1KiB"
+abstract struct Number
+  def humanize
+    units = %w[B KiB MiB GiB]
 
-Benchmark.ips do |bm|
-  buffer :: UInt8[1024]
-  buffer.to_slice.copy_from(
-    SecureRandom.random_bytes(1024).to_unsafe,
-    1024
-  )
+    value = self
+    unit = units.shift
+
+    while value >= 1024
+      value /= 1024
+      unit = units.shift
+    end
+
+    "#{value}#{unit}"
+  end
+end
+
+struct Int32
+  def kib
+    1024_u64 * self
+  end
+
+  def mib
+    1024.kib * self
+  end
+
+  def gib
+    1024.mib * self
+  end
+end
+
+BLOCK_SIZE = 4096
+
+data_size = (ENV["DATA_SIZE_GIB"]?.try(&.to_i) || 4).gib
+puts "Hashing #{data_size.humanize} of (semi)random data"
+
+Benchmark.bm do |bm|
+  data = IO::Memory.new(2.mib).tap do |io|
+    (2.mib / BLOCK_SIZE).times do
+      io.write(SecureRandom.random_bytes(BLOCK_SIZE))
+    end
+  end
+
   {% for bits in [32, 64] %}
-    XXHash{{ bits }}.open(0) do |digester|
-      bm.report("XX{{ bits }}:") do
-        digester.write(buffer.to_slice)
-      end
+    bm.report("XXHash{{bits}}") do
+      XXHash{{ bits }}.open(0) do |digester|
+        (data_size / 2.mib).times do
+          data.rewind
+          IO.copy(data, digester)
+        end
 
-      digester.hex_digest
+        digester.hex_digest
+      end
     end
   {% end %}
 end
