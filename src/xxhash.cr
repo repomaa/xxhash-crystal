@@ -81,8 +81,7 @@ end
       end
 
       def hex_digest
-        hash = digest.to_s(16)
-        XXHash{{ bits }}.hash_to_hex(hash)
+        XXHash{{ bits }}.hash_to_hex(digest)
       end
 
       private def create_state(seed)
