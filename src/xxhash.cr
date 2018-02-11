@@ -50,13 +50,8 @@ end
     class Digester < IO
       @state : LibXXHash{{ bits }}::State
 
-      def initialize(seed : Int = 0)
-        state = LibXXHash{{ bits }}.create_state
-        unless LibXXHash{{ bits }}.reset(state, seed.to_u{{ bits }}) == LibXXHash::Error::Ok
-          raise Exception.new("failed to initialize digester")
-        end
-
-        @state = state
+      def initialize(@seed : Int = 0)
+        @state = create_state(@seed)
       end
 
       def close
@@ -71,6 +66,11 @@ end
         raise Exception.new("cannot read from digester")
       end
 
+      def rewind
+        close
+        @state = create_state(@seed)
+      end
+
       def digest
         LibXXHash{{ bits }}.digest(@state)
       end
@@ -78,6 +78,15 @@ end
       def hex_digest
         hash = digest.to_s(16)
         XXHash{{ bits }}.hash_to_hex(hash)
+      end
+
+      private def create_state(seed)
+        state = LibXXHash{{ bits }}.create_state
+        unless LibXXHash{{ bits }}.reset(state, seed.to_u{{ bits }}) == LibXXHash::Error::Ok
+          raise Exception.new("failed to initialize digester")
+        end
+
+        state
       end
     end
 
