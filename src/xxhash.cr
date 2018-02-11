@@ -54,8 +54,13 @@ end
         @state = create_state(@seed)
       end
 
+      def finalize
+        close unless @closed
+      end
+
       def close
         LibXXHash{{ bits }}.free_state(@state)
+        @closed = true
       end
 
       def write(slice)
@@ -86,6 +91,7 @@ end
           raise Exception.new("failed to initialize digester")
         end
 
+        @closed = false
         state
       end
     end
