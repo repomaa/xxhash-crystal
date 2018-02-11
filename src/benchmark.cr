@@ -1,5 +1,5 @@
 require "benchmark"
-require "secure_random"
+require "random/secure"
 require "./xxhash"
 
 abstract struct Number
@@ -40,7 +40,7 @@ puts "Hashing #{data_size.humanize} of (semi)random data"
 Benchmark.bm do |bm|
   data = IO::Memory.new(2.mib).tap do |io|
     (2.mib / BLOCK_SIZE).times do
-      io.write(SecureRandom.random_bytes(BLOCK_SIZE))
+      io.write(Random::Secure.random_bytes(BLOCK_SIZE))
     end
   end
 

@@ -24,7 +24,7 @@ You should use the one that matches your cpu architecture.
 require "xxhash"
 
 # Pass a nn-bit seed
-seed = (SecureRandom.random_bytes(8).to_unsafe.as(UInt64*)).value
+seed = (Random::Secure.random_bytes(8).to_unsafe.as(UInt64*)).value
 puts XXHash64.hex_digest("foobar", seed)
 
 # Or use 0 by default

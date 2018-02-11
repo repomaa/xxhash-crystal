@@ -3,5 +3,10 @@ version: 0.1.0
 
 authors:
   - Joakim Reinert <mail@jreinert.com>
+targets:
+  xxhash:
+    main: src/xxhash.cr
+  benchmark:
+    main: src/benchmark.cr
 
 license: MIT

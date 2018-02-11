@@ -47,9 +47,7 @@ end
       bytes.map { |byte| "%02x" % byte }.join
     end
 
-    class Digester
-      include IO
-
+    class Digester < IO
       @state : LibXXHash{{ bits }}::State
 
       def initialize(seed : Int = 0)
